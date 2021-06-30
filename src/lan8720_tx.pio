@@ -1,0 +1,54 @@
+.program lan8720_tx
+.side_set 1
+
+; pin mapping:
+; pin+0: TX0
+; pin+1: TX1
+; pin+2: TXEN
+;
+; side_set pin is TX_EN
+
+.wrap_target
+idle:
+                                ; this loops while TXEN is inactive
+  jmp !osre inittx    side 0x00 ; if there are data in output shift register, go to inittx
+  jmp idle            side 0x00 ; repeat
+
+inittx:
+                                ; wait single clock
+  wait 1 gpio 22      side 0x00 ; wait for clock HI
+  wait 0 gpio 22      side 0x00 ; wait for clock LO
+
+sendloop:
+                                ; this loops until there no data in TX fifo
+  out pins 2          side 0x01 ; out 2 bits
+  wait 1 gpio 22      side 0x01 ; wait for clock HI
+  wait 0 gpio 22      side 0x01 ; wait for clock LO
+  jmp !osre sendloop  side 0x01 ; if there are data in output shift register, loop
+  set pins 0          side 0x00
+.wrap
+
+% c-sdk {
+
+static inline void lan8720_tx_init(PIO pio, uint sm, uint offset, uint pin) {
+    pio_sm_set_consecutive_pindirs(pio, sm, pin, 3, true);
+
+    pio_sm_config c = lan8720_tx_program_get_default_config(offset);
+    sm_config_set_out_pins(&c, pin, 2);
+
+    pio_gpio_init(pio, pin);
+    pio_gpio_init(pio, pin + 1);
+    pio_gpio_init(pio, pin + 2);
+    
+    sm_config_set_out_shift(&c, true, true, 8);
+    sm_config_set_set_pins(&c, pin, 2);
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_TX);
+
+    sm_config_set_clkdiv(&c, 1);
+
+    sm_config_set_sideset_pins(&c, pin + 2);
+    
+    pio_sm_init(pio, sm, offset, &c);
+    pio_sm_set_enabled(pio, sm, true);
+}
+%}

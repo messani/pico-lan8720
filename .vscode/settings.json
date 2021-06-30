@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "dma.h": "c",
+        "pico.h": "c",
+        "lan8720_rx.pio.h": "c",
+        "pio.h": "c",
+        "assert.h": "c",
+        "init.h": "c"
+    }
+}
