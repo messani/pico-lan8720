@@ -15,13 +15,37 @@ git submodule update
 
 Use cmake or VisualStudio Code to build the project.
 
+## Configuration
+
+there are some constants in file config.h. You can configure all pins but nINT/RETCLK is hardcoded to GPIO22.
+
+```
+#define LAN8720_PIN_RX              16
+#define LAN8720_PIN_TX              19
+#define LAN8720_PIN_MDIO            26
+
+RX0 = LAN8720_PIN_RX + 0
+RX1 = LAN8720_PIN_RX + 1
+CRS = LAN8720_PIN_RX + 2
+
+TX0 = LAN8720_PIN_TX + 0
+TX1 = LAN8720_PIN_TX + 1
+TXEN = LAN8720_PIN_TX + 2
+
+MDIO = LAN8720_PIN_MDIO + 0
+MDC = LAN8720_PIN_MDIO + 1
+
+22 = nINT/RETCLK
+
+```
+
 ## How does it work
 
 Because RPi Pico runs at higher speed (250MHz) and TX and RX loop executes in 4 cycles so it is possible to catch changes of the clock and capture 50MHz signal by PIO program.
 
 ### RX
 
-There is a little hack inspired by pico_rmii_ethernet to detect preamble and start frame delimiter (SFD) on RX0 and RX1 pins. After SFD, data are captured while RXEN is HI and written through DMA to memory. When RXEN gets LO, interrupt is called and length of the packet is calculated by write cursor of DMA. Interrupt handler should run as short as possible so packet processing is passed to event loop.
+There is a little hack inspired by pico_rmii_ethernet to detect preamble and start frame delimiter (SFD) on RX0 and RX1 pins. After SFD, data are captured while CRS is HI and written through DMA to memory. When CRS gets LO, interrupt is called and length of the packet is calculated by write cursor of DMA. Interrupt handler should run as short as possible so packet processing is passed to event loop.
 
 ### TX
 
