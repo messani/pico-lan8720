@@ -9,6 +9,7 @@
 #include <assert.h>
 #include <hardware/irq.h>
 #include <hardware/pio.h>
+#include <pico/critical_section.h>
 #include <pico/stdlib.h>
 #include <pico/unique_id.h>
 #include <string.h>
@@ -44,7 +45,6 @@ struct lan8720_framedata
   struct lan8720 *lan8720;
   uint16_t size;
   uint8_t data[LAN8720_FRAME_SIZE];
-  struct eventloophandler handler;
 };
 
 LWIP_MEMPOOL_DECLARE(lan8720_rx_pool, LAN8720_RX_FRAME_COUNT, sizeof(struct lan8720_framedata), "rx_pool");
@@ -190,8 +190,7 @@ static void lan8720_rx_finish(struct lan8720 *lan8720)
   uint8_t *wr = (uint8_t *)dma_channel_hw_addr(lan8720->rx_dma_channel)->write_addr;
   // frame length is calculated by difference of dma_write pointer and frame begin pointer
   framedata->size = (uint16_t)(wr - framedata->data);
-  eventloophandler_setup(&framedata->handler, lan8720_rx_process_frame, framedata);
-  eventloop_enqueue(lan8720->eventloop, &framedata->handler);
+  sys_timeout(0, lan8720_rx_process_frame, lan8720);
 }
 
 static void lan8720_rx_handle(struct lan8720 *lan8720)
@@ -428,7 +427,7 @@ void lan8720_idlehandler(void *userdata)
     lan8720_updatestate(lan8720);
   }
 
-  eventloop_enqueue(lan8720->eventloop, &lan8720->idlehandler);
+  sys_timeout(0, lan8720_idlehandler, lan8720);
 }
 
 err_t lan8720_netif_init(struct netif *netif)
@@ -517,15 +516,13 @@ err_t lan8720_netif_init(struct netif *netif)
     pio_sm_set_enabled(lan8720->pio, lan8720->rx_sm, true);
   }
   
-  eventloophandler_setup(&lan8720->idlehandler, lan8720_idlehandler, lan8720);
-  eventloop_enqueue(lan8720->eventloop, &lan8720->idlehandler);
+  sys_timeout(0, lan8720_idlehandler, lan8720);
 
   return ERR_OK;
 }
 
-void lan8720_init(struct lan8720 *lan8720, struct eventloop *eventloop, PIO pio, int sm, uint8_t mdio_pin, uint8_t rx_pin, uint8_t tx_pin)
+void lan8720_init(struct lan8720 *lan8720, PIO pio, int sm, uint8_t mdio_pin, uint8_t rx_pin, uint8_t tx_pin)
 {
-  lan8720->eventloop = eventloop;
   lan8720->mdio_pin = mdio_pin;
   lan8720->mdc_pin = mdio_pin + 1;
   lan8720->pio = pio;

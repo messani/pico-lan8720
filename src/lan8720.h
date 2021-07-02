@@ -1,7 +1,6 @@
 #ifndef LAN8720_H
 #define LAN8720_H
 
-#include "eventloop.h"
 #include "lwip/netif.h"
 #include <hardware/dma.h>
 #include <hardware/pio.h>
@@ -18,9 +17,6 @@ extern "C" {
 
 struct lan8720
 {
-  struct eventloop *eventloop;
-  struct eventloophandler idlehandler;
-
   uint32_t lastupdatetime;
 
   uint8_t mdio_pin;
@@ -54,7 +50,7 @@ struct lan8720
 };
 
 
-void lan8720_init(struct lan8720 *lan8720, struct eventloop *eventloop, PIO pio, int sm, uint8_t mdio_pin, uint8_t rx_pin, uint8_t tx_pin);
+void lan8720_init(struct lan8720 *lan8720, PIO pio, int sm, uint8_t mdio_pin, uint8_t rx_pin, uint8_t tx_pin);
 
 #ifdef __cplusplus
 }

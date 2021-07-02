@@ -2,6 +2,7 @@
 #include "eventloop.h"
 #include "lan8720.h"
 #include "lwip/apps/httpd.h"
+#include "lwip/timeouts.h"
 #include <hardware/clocks.h>
 #include <hardware/spi.h>
 #include <hardware/uart.h>
@@ -18,13 +19,11 @@ int main()
 
   stdio_init_all();
 
-  struct eventloop eventloop;
-  eventloop_init(&eventloop);
-
   struct lan8720 lan8720;
 
-  lan8720_init(&lan8720, &eventloop, LAN8720_PIO, LAN8720_SM, LAN8720_PIN_MDIO, LAN8720_PIN_RX, LAN8720_PIN_TX);
+  lan8720_init(&lan8720, LAN8720_PIO, LAN8720_SM, LAN8720_PIN_MDIO, LAN8720_PIN_RX, LAN8720_PIN_TX);
   httpd_init();
   
-  eventloop_run(&eventloop);
+  for (;;)
+    sys_check_timeouts();
 }
