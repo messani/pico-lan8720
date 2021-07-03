@@ -61,8 +61,6 @@ target_include_directories(pico_lwip INTERFACE
 )
 
 set(srcs
-  src/eventloop.c
-  src/eventloop.h
   src/main.c
   src/lan8720.c
   src/lan8720.h
