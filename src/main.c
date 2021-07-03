@@ -1,5 +1,4 @@
 #include "config.h"
-#include "eventloop.h"
 #include "lan8720.h"
 #include "lwip/apps/httpd.h"
 #include "lwip/timeouts.h"
