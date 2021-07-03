@@ -29,6 +29,7 @@
 
 #define LAN8720_CRC_POLY 0xedb88320
 
+//#define ENABLE_LOG
 #ifdef ENABLE_LOG
 #define LOG_FMT(fmt, ...) do { printf(fmt "\n", __VA_ARGS__); } while (false)
 #define LOG(text) do { printf(text); } while (false)
@@ -190,7 +191,7 @@ static void lan8720_rx_finish(struct lan8720 *lan8720)
   uint8_t *wr = (uint8_t *)dma_channel_hw_addr(lan8720->rx_dma_channel)->write_addr;
   // frame length is calculated by difference of dma_write pointer and frame begin pointer
   framedata->size = (uint16_t)(wr - framedata->data);
-  sys_timeout(0, lan8720_rx_process_frame, lan8720);
+  sys_timeout(0, lan8720_rx_process_frame, framedata);
 }
 
 static void lan8720_rx_handle(struct lan8720 *lan8720)
