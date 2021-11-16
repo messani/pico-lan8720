@@ -9,14 +9,14 @@
   wait 0 pin 2       ; Wait while TX0, TX1 and TXEN are nonzero
   wait 0 pin 0       ;
   wait 0 pin 1       ;
-                      
+  
   wait 1 pin 2       ; Detect preamble
   wait 1 pin 0       ;
-
+  
   wait 1 pin 1       ; Detect start frame delimiter
-
+  
   wait 0 gpio 22     ; Wait single clock
-  wait 1 gpio 22     ; 
+  wait 1 gpio 22     ;
 
 recvloop:
   wait 0 gpio 22     ; wait for clock LO

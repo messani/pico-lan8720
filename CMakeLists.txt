@@ -73,5 +73,9 @@ pico_generate_pio_header(${name} ${CMAKE_CURRENT_SOURCE_DIR}/src/lan8720_tx.pio)
 target_link_libraries(pico_lwip INTERFACE pico_stdlib hardware_sync)
 target_link_libraries(${name} pico_stdlib pico_mem_ops pico_unique_id hardware_sync pico_sync_mutex hardware_pio hardware_dma hardware_irq hardware_spi hardware_adc hardware_uart pico_lwip)
 
+# enable usb output, disable uart output
+pico_enable_stdio_usb(${name} 1)
+pico_enable_stdio_uart(${name} 0)
+
 pico_add_extra_outputs(${name})
 
