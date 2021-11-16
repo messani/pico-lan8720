@@ -13,8 +13,8 @@ idle:
                                 ; this loops while TXEN is inactive
   jmp !osre inittx    side 0x00 ; if there are data in output shift register, go to inittx
   jmp idle            side 0x00 ; repeat
-
-inittx:
+  
+  inittx:
                                 ; wait single clock
   wait 1 gpio 22      side 0x00 ; wait for clock HI
   wait 0 gpio 22      side 0x00 ; wait for clock LO
